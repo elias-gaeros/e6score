@@ -47,7 +47,7 @@ def shard_batch(shard: pl.DataFrame, topk: int, seed: Optional[int] = None):
     joint = (
         shard.select(["tags", "id"])
         .explode("tags")
-        .join(tags, left_on="tags", right_on="name", how="left", suffix="_tag")
+        .join(tags, left_on="tags", right_on="name", how="inner", suffix="_tag")
         .group_by("id")
     )
     shard = (
