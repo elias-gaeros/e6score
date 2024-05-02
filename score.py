@@ -274,7 +274,7 @@ def train_step(steps, state: TrainState, inputs: Batch):
     )
 
 
-ckpt_path = "params.ckpt"
+ckpt_path = os.path.abspath("params.ckpt")
 post_path = "posts.csv"
 batch_size = 4096
 tag_count = 32
