@@ -226,6 +226,7 @@ def optimizer(steps):
 
 @ft.partial(jax.jit, static_argnums=0)
 def train_step(steps, state: TrainState, inputs: Batch):
+    "SAM as an Optimal Relaxation of Bayes - https://arxiv.org/abs/2210.01620"
     peak_lr = 1e-3
     lsched = optax.linear_onecycle_schedule(steps, peak_lr)
     msched = lambda step: 0.85 + 0.1 * lsched(step) / peak_lr
