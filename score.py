@@ -37,8 +37,9 @@ class Batch(NamedTuple):
 
 def preprocess(shard: pl.DataFrame):
     return shard.with_columns(
-        pl.col("tag_string").str.split(" ").alias("tags")
-    ).with_columns(pl.col("rating").cast(pl.Categorical).cast(pl.Int8))
+        pl.col("tag_string").str.split(" ").alias("tags"),
+        pl.col("rating").cast(pl.Categorical).to_physical().cast(pl.Int8),
+    )
 
 
 def shard_batch(shard: pl.DataFrame, topk: int, seed: Optional[int] = None):
@@ -289,7 +290,7 @@ posts = (
     .filter(pl.col("is_deleted") == "f")
     .with_columns(pl.col("created_at").fill_null(strategy="backward"))
     .with_columns(
-        ((pl.col("created_at") - pl.date(2007, 2, 10)).dt.hours())
+        ((pl.col("created_at") - pl.date(2007, 2, 10)).dt.total_hours())
         .alias("age")
         .cast(float),
         pl.col("up_score", "comment_count", "down_score", "fav_count").cast(float),
@@ -361,5 +362,5 @@ with rp.Progress(*columns, console=console, redirect_stdout=False) as pbar:
         score = (inputs.fav_count - value) / stddev
         shard = shard.with_columns(pl.Series("fav_score", value))
         shard = shard.select(header)
-        shard.write_csv(sys.stdout.buffer, has_header=False)
+        shard.write_csv(sys.stdout.buffer, include_header=False)
         pbar.advance(task)
